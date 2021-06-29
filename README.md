@@ -121,6 +121,7 @@ Prometheus is a free software application used for event monitoring and alerting
 tmsh create auth user prometheus partition-access add { all-partitions { role admin } } prompt-for-password
 ````
 or do this via the GUI:
+
 ![Image](images/user-add.PNG)
 
 2. Ensure that Telemetry Streaming is installed on BIG-IP. This was listed as a prerequisite.
