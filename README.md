@@ -26,7 +26,9 @@ kubectl apply -f ingress/cis/cis2.yaml
 ```
 
 ## NGINX KIC (Kubernetes Ingress Controller)
-Install KIC using the open source, freely-available image from Docker Hub. Official instructions from NGINX are [here](https://docs.nginx.com/nginx-ingress-controller/installation/installation-with-manifests/). For this demo I recommend you run the commands below:
+Install KIC using the open source, freely-available image from Docker Hub. Official instructions from NGINX are [here](https://docs.nginx.com/nginx-ingress-controller/installation/installation-with-manifests/) but for this demo you can run the commands below.
+1. Edit the file ingress/nginx/vs-ingresslink.yaml and provide the desired IP of the VIP on F5. Optionally do this with vs-ingresslink2.yaml if you are running BIG-IP in HA.
+2. Run the commands below:
 ````bash
     #create namespace, rbac, tls, configmap, and ingress class to support KIC
     kubectl apply -f ingress/nginx/common/ns-and-sa.yaml
@@ -46,7 +48,25 @@ Install KIC using the open source, freely-available image from Docker Hub. Offic
 
     #Expose NGINX ingress via cluster IP service
     kubectl apply -f ingress/nginx/service/service.yaml
+    
+    #Create F5 IngressLink resources to expose NGINX Plus ingress controller via F5 BIG-IP
+    kubectl apply -f ingress/nginx/vs-ingresslink.yaml
+    kubectl apply -f ingress/nginx/vs-ingresslink2.yaml
+    
 ````
+## Demo App 1 (nginx helloworld page)
+This demo app will display an NGINX "helloworld" web page. Run the following commands to deploy it:
+````bash
+    #create a new namespace for this app
+    kubectl apply -f apps/nginx-helloworld/ns.yaml
+    #deploy the app. We'll make a replica set of 3 pods
+    kubectl apply -f apps/nginx-helloworld/deployment.yaml
+    #expose the pods as a service on port 80
+    kubectl apply -f apps/nginx-helloworld/service.yaml
+    #create an ingress resource that KIC will configure KIC to route traffic to these pods
+    kubectl apply -f apps/nginx-helloworld/ingress.yaml
+````
+
 ## NGINX Plus KIC
 For the purpose of demonstration, we will also deploy KIC based on NGINX Plus. This will demonstrate the [benefits of NGINX Plus](https://www.nginx.com/products/nginx/#compare-versions).
 1. Save your login details for your private container registry as a K8s secret. Edit the file /ingress/nginx-plus/common/docker-login-secret.yaml and follow the [instructions from Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) if needed. The line with ```.dockerconfigjson``` should have the base64-encoded file from your local file ```~/.docker/config.json```
@@ -71,6 +91,20 @@ For the purpose of demonstration, we will also deploy KIC based on NGINX Plus. T
     kubectl apply -f ingress/nginx-plus/vs-ts.yaml
     kubectl apply -f ingress/nginx-plus/vs-ts2.yaml
 ````
+
+## Demo App 2 (f5 helloworld page)
+This demo app will display an F5 "helloworld" web page. Run the following commands to deploy it:
+````bash
+    #create a new namespace for this app
+    kubectl apply -f apps/f5-helloworld/ns.yaml
+    #deploy the app. We'll make a replica set of 3 pods
+    kubectl apply -f apps/f5-helloworld/deployment.yaml
+    #expose the pods as a service on port 80
+    kubectl apply -f apps/f5-helloworld/service.yaml
+    #create an ingress resource that KIC will configure KIC to route traffic to these pods
+    kubectl apply -f apps/f5-helloworld/ingress.yaml
+````
+
 ## Prometheus
 Prometheus is a free software application used for event monitoring and alerting. We will deploy Prometheus and again, these instructions are simply copied from another user guide. Our goal here is to run Prometheus in a pod inside Kubernenetes so that it can pull metrics from other pods, using the K8s api to discover other pods with appropriate annotations and labels.
 
