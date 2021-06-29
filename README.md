@@ -3,12 +3,16 @@ User guide to deploying Prometheus and collecting metrics from Telemetry Streami
 
 In the case of KIC, we will deploy both open source KIC (i.e., free community version), and KIC using NGINX Plus (i.e., requires paid license or demo key).
 
-This guide is heavily similar to the work done by Mark Dittmer here. This guide mostly exists to append NGINX KIC to Mark's user guide and demonstrate the added value of KIC with NGINX Plus.
+This guide is heavily based on the work done by Mark Dittmer [here](https://github.com/mdditt2000/k8s-bigip-ctlr/tree/main/user_guides/prometheus). This guide mostly exists to add NGINX KIC to Mark's user guide and demonstrate the added value of KIC with NGINX Plus.
+
+This guide also uses different Custom Resources to expose services in K8s. F5's IngressLink is used to expose KIC, and TransportServer is used to expose KIC with NGINX Plus. The reason behind the different types is simply to demo their use.
 
 ## Prerequisites
-All instructions for prerequisites are provided or linked to below.
-- Running K8s cluster version >1.18.
-- Running BIG-IP in standalone or HA cluster, where BIG-IP can route to the pod overlay network (hosted K8s services or VXLAN/BGP has been configured).
+All instructions for configuragtion of prerequisites are provided or linked to below.
+- A running K8s cluster version >1.18.
+- A running BIG-IP in standalone or HA cluster
+  - BIG-IP must be able to route to the pod network (hosted K8s services or VXLAN/BGP has been configured).
+  - Telemetry Streaming (TS) must be [installed](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/installation.html).
 - NGINX Plus license or demo cert/key pair.
 - A private container image of NGINX Plus KIC built using Docker commands outlined [here](https://docs.nginx.com/nginx-ingress-controller/installation/building-ingress-controller-image/)
 - A private container registry hosting the image of your KIC image based on NGINX Plus.
@@ -106,6 +110,23 @@ This demo app will display an F5 "helloworld" web page. Run the following comman
 ````
 
 ## Prometheus
-Prometheus is a free software application used for event monitoring and alerting. We will deploy Prometheus and again, these instructions are simply copied from another user guide. Our goal here is to run Prometheus in a pod inside Kubernenetes so that it can pull metrics from other pods, using the K8s api to discover other pods with appropriate annotations and labels.
+Prometheus is a free software application used for event monitoring and alerting. We will deploy Prometheus in a pod inside Kubernenetes so that it can pull metrics from other pods, using the K8s api to discover other pods using their annotations and labels.
+
+First, configure the Telemetry Streaming declaration by running the curl command below:
+
+````bash
+curl -kv -u admin:<password_for_bigip> https://<mgmt_addr_of_bigip>/mgmt/shared/telemetry/declare -d @apps/monitoring/ts-declaration.json -H "content-type:application/json"
+````
+After you get a successful response, run the commands below to install and configure Prometheus
+
+````bash
+kubectl create -f apps/monitoring/ns.yaml
+kubectl create -f apps/monitoring/clusterrole.yaml
+kubectl create -f apps/monitoring/config-map.yaml
+kubectl create -f apps/monitoring/prometheus-deployment.yaml
+kubectl create -f apps/monitoring/prometheus-service.yaml
+kubectl create -f apps/monitoring/vs-ts.yaml
+kubectl create -f apps/monitoring/vs-ts2.yaml
+````
 
 
