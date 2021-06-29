@@ -112,21 +112,37 @@ This demo app will display an F5 "helloworld" web page. Run the following comman
 ## Prometheus
 Prometheus is a free software application used for event monitoring and alerting. We will deploy Prometheus in a pod inside Kubernenetes so that it can pull metrics from other pods, using the K8s api to discover other pods using their annotations and labels.
 
-First, configure the Telemetry Streaming declaration by running the curl command below:
-
+### BIG-IP preparation
+1. Create a user called "prometheus" with Admin credentials on the BIG-IP. Create a password and remember it (you will need it in the prometheus configMap later). You can use this command
 ````bash
-curl -kv -u admin:<password_for_bigip> https://<mgmt_addr_of_bigip>/mgmt/shared/telemetry/declare -d @apps/monitoring/ts-declaration.json -H "content-type:application/json"
+tmsh create auth user prometheus partition-access add { all-partitions { role admin } } prompt-for-password
 ````
-After you get a successful response, run the commands below to install and configure Prometheus
+or do this via the GUI:
+![Image](images/user-add.PNG)
+
+2. Ensure that Telemetry Streaming is installed on BIG-IP. This was listed as a prerequisite.
+3. Configure the Telemetry Streaming declaration by running the curl commands below:
 
 ````bash
-kubectl create -f apps/monitoring/ns.yaml
-kubectl create -f apps/monitoring/clusterrole.yaml
-kubectl create -f apps/monitoring/config-map.yaml
-kubectl create -f apps/monitoring/prometheus-deployment.yaml
-kubectl create -f apps/monitoring/prometheus-service.yaml
-kubectl create -f apps/monitoring/vs-ts.yaml
-kubectl create -f apps/monitoring/vs-ts2.yaml
+curl -kv -u admin:<password_for_bigip1> https://<mgmt_addr_of_bigip>/mgmt/shared/telemetry/declare -d @apps/monitoring/ts-declaration.json -H "content-type:application/json"
+curl -kv -u admin:<password_for_bigip2> https://<mgmt_addr_of_bigip>/mgmt/shared/telemetry/declare -d @apps/monitoring/ts-declaration.json -H "content-type:application/json"
+````
+### Prometheus deployment
+After TS is installed , edit some of the files below to configure for your environment.
+1. The file ```apps/monitoring/config-map.yaml``` will need to be edited around lines #164 and #166 to include the password of your prometheus user on BIG-IP, and the management IP's of your devices.
+2. If you have deployed NGINX or F5 CIS without following the instructions above, with different manifest files, or if you have changed any labels, look over this file and ensure that the labels configured in this config file match your values.
+3. Edit the file apps/monitoring/vs-ts.yaml and provide the desired IP of the VIP on F5. Optionally do this with vs-ts2.yaml if you are running BIG-IP in HA.
+
+run the commands below to install and configure Prometheus
+
+````bash
+kubectl apply -f apps/monitoring/ns.yaml
+kubectl apply -f apps/monitoring/clusterrole.yaml
+kubectl apply -f apps/monitoring/config-map.yaml
+kubectl apply -f apps/monitoring/prometheus-deployment.yaml
+kubectl apply -f apps/monitoring/prometheus-service.yaml
+kubectl apply -f apps/monitoring/vs-ts.yaml
+kubectl apply -f apps/monitoring/vs-ts2.yaml
 ````
 
 
