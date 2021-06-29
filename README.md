@@ -62,7 +62,7 @@ For the purpose of demonstration, we will also deploy KIC based on NGINX Plus. T
     kubectl apply -f ingress/nginx-plus/common/ingress-class.yaml
     
     #Run the Ingress Controller
-    kubectl apply -f ingress/nginx-plus/deployment/nginx-ingress.yaml
+    kubectl apply -f ingress/nginx-plus/deployment/nginx-plus-ingress.yaml
 
     #Expose NGINX ingress via cluster IP service
     kubectl apply -f ingress/nginx-plus/service/service.yaml
