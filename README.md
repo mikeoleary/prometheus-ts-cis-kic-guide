@@ -45,7 +45,7 @@ Install KIC using the open source, freely-available image from Docker Hub. Offic
     kubectl apply -f ingress/nginx/deployment/nginx-ingress.yaml
 
     #Expose NGINX ingress via cluster IP service
-    kubectl apply -f nginx/service/service.yaml
+    kubectl apply -f ingress/nginx/service/service.yaml
 ````
 ## NGINX Plus KIC
 For the purpose of demonstration, we will also deploy KIC based on NGINX Plus. This will demonstrate the [benefits of NGINX Plus](https://www.nginx.com/products/nginx/#compare-versions).
