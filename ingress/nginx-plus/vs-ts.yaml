@@ -1,0 +1,20 @@
+apiVersion: "cis.f5.com/v1"
+kind: TransportServer
+metadata:
+  labels:
+    f5cr: "true"
+  name: nginx-plus-ingress-ts1
+  namespace: nginx-plus-ingress
+spec:
+  virtualServerAddress: "10.0.2.100"
+  virtualServerPort: 80
+  virtualServerName: nginx-plus-1
+  mode: standard
+  snat: auto
+  pool:
+    service: nginx-plus-ingress
+    servicePort: 80
+    monitor:
+      type: tcp
+      interval: 10
+      timeout: 10
