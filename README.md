@@ -7,6 +7,7 @@ This guide is heavily based on the work done by Mark Dittmer [here](https://gith
 
 This guide also uses different Custom Resources to expose services in K8s. F5's IngressLink is used to expose KIC, and TransportServer is used to expose KIC with NGINX Plus. The reason behind the different types is simply to demo their use.
 
+## Architecture diagram
 ![Image](images/Prometheus-user-guide.png)
 
 ## Prerequisites
